@@ -1,4 +1,21 @@
 #include<stdio.h>
+/*
+ * rb insert z:
+ * z is insert node, y is z's uncle, z is RED
+ * while z's father is RED
+ * case 1: y is  RED, do something(just color) and repeate while
+ * case 2: y is BLACK, z is to his grandfather is left-right, do something and goto case3
+ * case 3: y is BLACK, z to his grandfather is ll or rr, do something  and end while
+ *
+ * rb delete z: if z is not two child node, delete z's successor y , and copy y to z. else delete z
+ * x is delete node y's child, x is double black or red black node, x's color is BLACK
+ * while x != root and x's color == black: w is x's brother
+ * case 1: w is RED, do something and goto case 2,3,4
+ * case 2: w is BLACK and w has two BLACK child, do something(just color), and x move to x's father and repeate while
+ * case 3: w is BLACK and w's right(w is right child) child is BLACK, do something, and goto case 4.
+ * case 4: w is BLACK and w's right child is RED, do something and end while
+ *
+ */
 
 typedef int T_KEY;
 
@@ -12,9 +29,12 @@ typedef struct RBTreeNode{
     RBTreeNode* left;
     RBTreeNode* right;
     RBTreeNode* p;
+    RBTreeNode(T_KEY k=0, RB c=BLACK, RBTreeNode* l=NULL, 
+        RBTreeNode* r=NULL, RBTreeNode* pa=NULL)
+            :key(k), color(c),left(l),right(r),p(pa){}
 } *RBTree;
+RBTreeNode* NIL = new RBTreeNode();
 
-RBTreeNode* NIL = NULL;
 
 void left_rotate(RBTree &root, RBTreeNode *x)
 {
@@ -72,15 +92,18 @@ void rb_insert_fixup(RBTree &root, RBTreeNode *z)
             //z->p is left child
             y = z->p->p->right;
             if (y->color == RED) {
+                printf("case 1\n");
                 z->p->color = BLACK;
                 y->color = BLACK;
                 z->p->p->color = RED;
                 z = z->p->p;
             } else {
                 if (z == z->p->right) {
+                    printf("case 2\n");
                     z=z->p;
                     left_rotate(root, z);
                 } 
+                printf("case 3\n");
                 z->p->color = BLACK;
                 z->p->p->color = RED;
                 right_rotate(root, z->p->p);
@@ -88,15 +111,18 @@ void rb_insert_fixup(RBTree &root, RBTreeNode *z)
         } else {
             y = z->p->p->left;
             if (y->color == RED) {
+                printf("case 1\n");
                 z->p->color = BLACK;
                 y->color = BLACK;
                 z->p->p->color = RED;
                 z = z->p->p;
             } else {
                 if (z == z->p->left) {
+                    printf("case 2\n");
                     z = z->p;
                     right_rotate(root, z);
                 }
+                printf("case 3\n");
                 z->p->color = BLACK;
                 z->p->p->color = RED;
                 left_rotate(root, z->p->p);
@@ -140,6 +166,7 @@ void rb_delete_fixup(RBTree &root, RBTreeNode *x)
             w = x->p->right; //w is not nil, because x is double black
             if (w->color==RED) {
                 //case 1
+                printf("case 1\n");
                 x->p->color = RED;
                 w->color = BLACK;
                 left_rotate(root, x->p);
@@ -148,17 +175,20 @@ void rb_delete_fixup(RBTree &root, RBTreeNode *x)
             //w->color == BLACK
             if (w->left->color == BLACK and w->right->color == BLACK) {
                 //case 2
+                printf("case 2\n");
                 w->color = RED;
                 x = x->p;
             } else {
                 if (w->right->color == BLACK) {
                     //case 3
+                    printf("case 3\n");
                     w->left->color = BLACK;
                     w->color = RED;
                     right_rotate(root, w);
                     w = w->p; // or w = x->p->right;
                 }
                 //case 4
+                printf("case 4\n");
                 w->color = x->p->color;
                 x->p->color = BLACK;
                 w->right->color = BLACK;
@@ -167,24 +197,27 @@ void rb_delete_fixup(RBTree &root, RBTreeNode *x)
             }
 
         } else {
-            //TODO
             w = x->p->left; 
             if (w->color == RED) {
+                printf("case 1\n");
                 x->p->color = RED;
                 w->color = BLACK;
                 right_rotate(root, x->p);
                 w = x->p->left;
             }
             if (w->left->color == BLACK and w->right->color == BLACK) {
+                printf("case 2\n");
                 w->color = RED;
                 x = x->p;
             } else {
                 if (w->left->color = BLACK) {
+                    printf("case 3\n");
                     w->right->color = BLACK;
                     w->color = RED;
                     left_rotate(root, w);
                     w = w->p;
                 }
+                printf("case 4\n");
                 w->color = x->p->color;
                 x->p->color = BLACK;
                 w->left->color = BLACK;
@@ -284,7 +317,53 @@ RBTreeNode* rb_delete(RBTree &root, RBTreeNode *z) {
     
 }
 
+void print_tree(RBTree root) 
+{
+    if (root == NIL) {
+        printf("# ");
+        return;
+    }
+    printf("(%d,%c) ", root->key,root->color);
+    print_tree(root->left);
+    print_tree(root->right);
+}
 int main(int argc, char** argv)
 {
+
+    RBTreeNode *root = NIL;
+    rb_insert(root, new RBTreeNode(1));
+    print_tree(root);
+    printf("\n");
+    rb_insert(root, new RBTreeNode(3));
+    print_tree(root);
+    printf("\n");
+    rb_insert(root, new RBTreeNode(2));
+    print_tree(root);
+    printf("\n");
+    rb_insert(root, new RBTreeNode(10));
+    print_tree(root);
+    printf("\n");
+    rb_insert(root, new RBTreeNode(15));
+    print_tree(root);
+    printf("\n");
+    rb_insert(root, new RBTreeNode(8));
+    print_tree(root);
+    printf("\n");
+    rb_insert(root, new RBTreeNode(13));
+    print_tree(root);
+    printf("\n");
+    printf("Begin to delete----------\n");
+    RBTreeNode* d = rb_delete2(root, root->left);
+    delete d;
+    print_tree(root);
+    printf("\n");
+    d = rb_delete2(root, root->left->right);
+    delete d;
+    print_tree(root);
+    printf("\n");
+    d = rb_delete2(root, root->right);
+    delete d;
+    print_tree(root);
+    printf("\n");
     return 0;
 }
