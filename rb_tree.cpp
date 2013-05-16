@@ -353,15 +353,15 @@ int main(int argc, char** argv)
     print_tree(root);
     printf("\n");
     printf("Begin to delete----------\n");
-    RBTreeNode* d = rb_delete2(root, root->left);
+    RBTreeNode* d = rb_delete(root, root->left);
     delete d;
     print_tree(root);
     printf("\n");
-    d = rb_delete2(root, root->left->right);
+    d = rb_delete(root, root->left->right);
     delete d;
     print_tree(root);
     printf("\n");
-    d = rb_delete2(root, root->right);
+    d = rb_delete(root, root->right);
     delete d;
     print_tree(root);
     printf("\n");
