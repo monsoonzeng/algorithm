@@ -9,8 +9,17 @@ void dijkstra(int[][] matrix, int size, int source) {
     for(int i=0; i<size; ++i) {
         q.push_back(i);
     }
+    int current_node = source;
+    int min_length;
     while(!q.empty()) {
-        
+        min_length = -1;
+        for (list<int>::iterator it=q.begin(); it!=q.end(); ++it) {
+            if (distance[*it] < 0 || matrix[*it][current_node]>=0 
+                        && distance[*it] > (distance[current_node]+matrix[*it][current_node])) {
+                distance[*it] = distance[current_node]+matrix[*it][current_node]; 
+            }
+
+        }
     }
 
 }
