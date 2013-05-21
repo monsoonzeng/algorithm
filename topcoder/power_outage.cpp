@@ -17,44 +17,22 @@ int PowerOutage::estimateTimeOut(vector<int> fromJunction, vector<int> toJunctio
     int value_index[50];
     int edge_size = fromJunction.size();
     int point_size = fromJunction.size()+1;
-    vector<vector<int> > small_length(point_size, vector<int>(point_size, -1));
-    vector<vector<int> > sp(point_size, vector<int>(point_size, 0));
-    for (int i=0; i<point_size; ++i) {
-        small_length[i][i] = 0;
-        sp[i][i] = i;
-    }
-    vector<int>    pre_node;
-    pre_node.push_back(0);
     value_index[0]=0;
-    for (int i=0; i<edge_size; ++i) {
-        value_index[toJunction[i]] = i+1;	
-        //small_length[fromJunction[i]][toJunction[i]]=ductLength[i];
-        //small_length[toJunction[i]][fromJunction[i]]=ductLength[i]; 
-        for (int j=0; j<pre_node.size(); ++j) {
-            if (small_length[pre_node[j]][value_index[fromJunction[i]]] == -1) {
-                continue;
-            }
-            small_length[pre_node[j]][value_index[toJunction[i]]] = small_length[pre_node[j]][value_index[fromJunction[i]]] + ductLength[i];
-            small_length[value_index[toJunction[i]]][pre_node[j]] = small_length[pre_node[j]][value_index[toJunction[i]]];
-            sp[pre_node[j]][value_index[toJunction[i]]] = sp[pre_node[j]][value_index[fromJunction[i]]];
-        }
-        pre_node.push_back(value_index[toJunction[i]]);
-    }
     //get min_length
-    int last_node=value_index[toJunction[0]];
-    int min_length = ductLength[0];
-    vector<int> min_array;
-    int common_father = 0;
+    int last_node=0;
+    int min_length = 0;
     int increase_length = 0;
-    for (int i=1; i<edge_size; ++i) {
+    vector<int> depth(point_size, 0);
+    for (int i=0; i<edge_size; ++i) {
+        value_index[toJunction[i]] = i + 1;
+        depth[i+1] = depth[value_index[fromJunction[i]]] + ductLength[i];
         min_length += ductLength[i];
-        common_father = sp[last_node][value_index[fromJunction[i]]];
-        increase_length =  small_length[common_father][last_node] - small_length[value_index[fromJunction[i]]][common_father]; 
+        increase_length = depth[last_node] - depth[value_index[fromJunction[i]]];
         if (ductLength[i] < increase_length) {
             min_length += ductLength[i];
         } else {
             min_length += increase_length;
-            last_node = value_index[toJunction[i]];
+            last_node = i+1;
         }
     }
     return min_length;
