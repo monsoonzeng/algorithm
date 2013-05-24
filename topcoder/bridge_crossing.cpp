@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <iostream>
 
 using std::vector;
 
@@ -33,5 +34,21 @@ int BridgeCrossing::minTime(vector<int> times) {
 }
 
 int main() {
+    BridgeCrossing bc;
+    vector<int> times;
+    times.push_back(1);
+    times.push_back(2);
+    times.push_back(5);
+    //times.push_back(4);
+    //times.push_back(10);
+    int result = bc.minTime(times);
+    std::cout << result << std::endl;
+    times.push_back(99);
+    times.push_back(100);
+    result = bc.minTime(times);
+    std::cout << result << std::endl;
+    times.push_back(200);
+    result = bc.minTime(times);
+    std::cout << result << std::endl;
     return 0;
 }
