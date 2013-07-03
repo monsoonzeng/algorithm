@@ -28,25 +28,25 @@ void morris_travelsal(TreeNode *root)
 
     while(current!=NULL) {
         if (current->left == NULL) {
-	    cout<<current->val<<" ";
-	    current = current->right;
-	} else {
-	    pre = current->left;
-	    //find predecessor of current
-	    while(pre->right != NULL && pre->right != current) {
-	        pre = pre->right;
-	    }
-	    if (pre->right == NULL) {
-	        //first find predecessor
-		pre->right = current;
-		current = current->left;
-	    } else {
-	       //left tree has traveled; revert the predecessor's right child
-	       cout << current->val << " ";
-	       pre->right = NULL;
-	       current = current->right;
-	    }
-	}
+            cout<<current->val<<" ";
+            current = current->right;
+        } else {
+            pre = current->left;
+            //find predecessor of current
+            while(pre->right != NULL && pre->right != current) {
+                pre = pre->right;
+            }
+            if (pre->right == NULL) {
+                //first find predecessor
+            pre->right = current;
+            current = current->left;
+            } else {
+               //left tree has traveled; revert the predecessor's right child
+               cout << current->val << " ";
+               pre->right = NULL;
+               current = current->right;
+            }
+        }
     }
 }
 

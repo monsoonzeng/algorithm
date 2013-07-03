@@ -5,10 +5,10 @@
 
 clock_t g_clock_start;
 #define CLOCK_START (g_clock_start=clock());
-#define PRINT_TIME_USED printf("%s:%s(%d) Run time:%d\n",__FILE__, __FUNCTION__, __LINE__, \
+#define PRINT_TIME_USED fprintf(stderr, "%s:%s(%d) Run time:%d\n",__FILE__, __FUNCTION__, __LINE__, \
             (clock()-g_clock_start));
 
-void revert_new(char *src, int length) 
+void revert_new(char *src, int length)
 {
     char *start;
     char *end;
@@ -17,22 +17,25 @@ void revert_new(char *src, int length)
     int start_length;
     int end_length;
     const int max_word_size = 50;
-    char buffer[100];
-    char *buffer_start = buffer;
-    char *buffer_end = buffer; // point not used buffer
+    char left_buffer[50];
+    char right_buffer[50];
+    char *buffer_start = left_buffer;
+    char *buffer_end = left_buffer; // point not used buffer
     bool buffer_save_right = false;
     bool pre_is_word = false;
     char *empty_pos;
+
     for (start=src, end=src+length-1; start < end || buffer_start != buffer_end; ) {
         if (buffer_start == buffer_end) {
             // buffer empty, swap start and end
-            if (pre_is_word) {
-                // find next not ' '
+            if (*start == ' ') {
                 for (start_blank = start; *start_blank == ' ' && start_blank <= end; ++start_blank) {}
+            } else {
+                for (start_blank = start; *start_blank != ' ' && start_blank <= end; ++start_blank) {}
+            }
+            if (*end == ' ') {
                 for (end_blank = end; *end_blank == ' ' && end_blank >= start; --end_blank) {}
             } else {
-                // find next ' ' 
-                for (start_blank = start; *start_blank != ' ' && start_blank <= end; ++start_blank) {}
                 for (end_blank = end; *end_blank != ' ' && end_blank >= start; --end_blank) {}
             }
             if (start_blank > end) {
@@ -42,30 +45,30 @@ void revert_new(char *src, int length)
             end_length = end - end_blank;
             if (start_length < end_length) {
                 // copy right to buffer
-                memcpy(buffer+max_word_size, end_blank+1, end_length);
+                memcpy(right_buffer, end_blank+1, end_length);
                 // swap left and buffer
                 memcpy(end-start_length+1, start, start_length);
-                memcpy(start, buffer+max_word_size, start_length);
+                memcpy(start, right_buffer, start_length);
                 // update buffer_save_right and buffer_start buffer_end
-                buffer_start = buffer + max_word_size + start_length;
-                buffer_end = buffer + max_word_size + end_length;
+                buffer_start = right_buffer+ start_length;
+                buffer_end = right_buffer + end_length;
                 buffer_save_right = true;
                 empty_pos = end_blank+1;
             } else if(start_length == end_length) {
                 // swap right and left
-                memcpy(buffer, end_blank+1, end_length);
+                memcpy(left_buffer, end_blank+1, end_length);
                 memcpy(end_blank+1, start, end_length);
-                memcpy(start, buffer, end_length);
+                memcpy(start, left_buffer, end_length);
                 empty_pos = NULL;
             } else {
                 // copy left to buffer
-                memcpy(buffer, start, start_length);
+                memcpy(left_buffer, start, start_length);
                 // swap left and buffer
                 memcpy(start, end_blank+1, end_length);
-                memcpy(end_blank+1, buffer+(start_length-end_length), end_length);
+                memcpy(end_blank+1, left_buffer+(start_length-end_length), end_length);
                 // update buffer_save_right and buffer_start buffer_end
-                buffer_start = buffer;
-                buffer_end = buffer + start_length-end_length;
+                buffer_start = left_buffer;
+                buffer_end = left_buffer + start_length-end_length;
                 buffer_save_right = false;
                 empty_pos = start+end_length;
             }
@@ -98,11 +101,11 @@ void revert_new(char *src, int length)
             } else {
                 // swap start and buffer, buffer change
                 memcpy(end+1, start+start_length-end_length, end_length);
-                memcpy(buffer, start, start_length-end_length);
+                memcpy(left_buffer, start, start_length-end_length);
                 memcpy(start, buffer_start, end_length);
                 // update buffer_start buffer_end buffer_save_right
-                buffer_start = buffer;
-                buffer_end = buffer+start_length-end_length;
+                buffer_start = left_buffer;
+                buffer_end = buffer_start+start_length-end_length;
                 buffer_save_right = false;
                 empty_pos = start+end_length;
             }
@@ -128,10 +131,10 @@ void revert_new(char *src, int length)
             if (start_length <= end_length) {
                 // swap buffer and end, buffer change
                 memcpy(start-start_length, end_blank+1, start_length);
-                memcpy(buffer+max_word_size, end_blank+1+start_length, end_length - start_length);
-                memcpy(end_blank+1, buffer_start, start_length); 
+                memcpy(right_buffer, end_blank+1+start_length, end_length - start_length);
+                memcpy(end+1-start_length, buffer_start, start_length);
                 //buffer change
-                buffer_start = buffer+max_word_size;
+                buffer_start = right_buffer;
                 buffer_end = buffer_start + end_length-start_length;
                 buffer_save_right = true;
                 empty_pos = end_blank+1;
@@ -145,7 +148,7 @@ void revert_new(char *src, int length)
             }
             end = end_blank;
         }
-        // next is find consecutive blank or word start 
+        // next is find consecutive blank or word start
         pre_is_word = !pre_is_word;
     }
 }
@@ -156,6 +159,9 @@ void revert(char*src, int length) {
     char *end;
     char *start;
     for (start=src, end=src+length-1; start<end; ++start, --end) {
+//        *start ^= *end;
+//        *end ^= *start;
+//        *start ^= *end;
          tmp = *start;
          *start = *end;
          *end = tmp;
@@ -163,6 +169,9 @@ void revert(char*src, int length) {
     for (tmp_index=src; tmp_index < src+length; ) {
         for (start_blank=tmp_index; *start_blank != ' ' && *start_blank != '\0'; ++start_blank) {}
         for (start=tmp_index, end=start_blank-1 ; start < end; ++start, --end) {
+//            *start ^= *end;
+//            *end ^= *start;
+//            *start ^= *end;
             tmp = *start;
             *start = *end;
             *end = tmp;
@@ -172,7 +181,7 @@ void revert(char*src, int length) {
     }
 }
 
-void get_str(char *src, int length) 
+void get_str(char *src, int length)
 {
     for (int i=0; i<length; ++i) {
         if (i % 30 == 29) {
@@ -190,8 +199,10 @@ void get_str(char *src, int length)
 }
 int main()
 {
-    int length = 128;
+    int length = 128000000;
     char *src = new char[length];
+    src[0] = ' ';
+    src[1] = ' ';
     /*
      strcpy(src, "i am going to school");
     printf("%s\n", src);
@@ -219,14 +230,15 @@ int main()
     revert_new(src, length);
     printf("%s\n", src);
 */
-    get_str(src, length);
+//    length = 128;
+    get_str(src+2, length-2);
     length = strlen(src);
     printf("%s\n", src);
     CLOCK_START;
-//    revert(src, length);
-    revert_new(src, length);
+    revert(src, length);
+//    revert_new(src, length);
     printf("%s\n", src);
     PRINT_TIME_USED;
-    
+
     return 0;
 }
