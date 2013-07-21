@@ -38,8 +38,8 @@ void morris_travelsal(TreeNode *root)
             }
             if (pre->right == NULL) {
                 //first find predecessor
-            pre->right = current;
-            current = current->left;
+                pre->right = current;
+                current = current->left;
             } else {
                //left tree has traveled; revert the predecessor's right child
                cout << current->val << " ";

@@ -60,7 +60,6 @@ void quick_sort(int a[], int head, int tail)
         }
     }
     a[start]=cur;
-//    print(a, 5);
     quick_sort(a, head, start-1);
     quick_sort(a, start+1, tail);
 }

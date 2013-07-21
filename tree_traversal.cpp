@@ -1,7 +1,9 @@
 #include <iostream>
 #include <cstdio>
 #include <stack>
+#include <vector>
 
+using std::vector;
 using std::stack;
 using std::cout;
 using std::endl;
@@ -35,7 +37,67 @@ void preorder_traversal(TreeNode *root) {
         }
     }
 }
-
+/*
+stack<TreeNode*> tree_traversal_preorder(TreeNode *root, TreeNode *node) {
+    stack<TreeNode*> st;
+    stack<TreeNode*> path;
+    TreeNode* cn = root;
+    while (cn != NULL || !st.empty()) {
+        if (cn != NULL) {
+            // visit father
+            path.push(cn);
+            if (cn == node) {
+                // get current
+                return path;
+            }
+            // push right
+            st.push(cn->right);
+            cn = cn->left;
+        } else {
+            cn = st.top();
+            st.pop();
+            path.pop();
+        }
+    }
+}
+*/
+vector<TreeNode*> tree_traversal(TreeNode *root, TreeNode *node) {
+    vector<TreeNode*> st;
+    st.push_back(root);
+    TreeNode *cn = root;
+    TreeNode *father= root;
+    stack<TreeNode*> path;
+    while(!st.empty()) {
+        cn = st.back();
+        if (cn->left != NULL) {
+            st.push_back(cn->left);
+        } else if (cn->right != NULL) {
+            st.push_back(cn->right);
+        } else {
+            if (cn == node) {
+                // get path
+                return st;
+            }
+            st.pop_back();
+            while (!st.empty()) {
+                father = st.back();
+                // get brother
+                if (father->left == cn && father->right != NULL) {
+                    st.push_back(father->right);
+                    break;
+                } else {
+                    cn = father;
+                    if (cn == node) {
+                        // get path
+                        return st;
+                    }
+                    st.pop_back();
+                }
+            }
+        }
+    }
+    return st;
+}
 void midorder_traversal(TreeNode *root) {
     stack<TreeNode*> st;
     TreeNode *cn = root;
@@ -125,6 +187,13 @@ int main(int argc, char *argv[])
     midorder_traversal2(&root);
     cout << "\npost_order traversal: " << endl;
     postorder_traversal(&root);
-    
+    cout << "\npath: node 4" << endl;
+    vector<TreeNode*> st = tree_traversal(&root, &node4);
+    while(!st.empty()) {
+        cout << st.back()->val << endl;
+        st.pop_back();
+    }
+
+
     return 0;
 }
